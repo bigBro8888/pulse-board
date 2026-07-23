@@ -28,7 +28,13 @@ function isAuthorized(request) {
 }
 
 function getKv(env) {
-  return env.PROJECTS_KV || env.PULSE_KV || null
+  return (
+    env.PROJECTS_KV ||
+    env.projects_kv ||
+    env.PULSE_KV ||
+    env.PULSE_kv ||
+    null
+  )
 }
 
 function missingKvResponse(env) {
