@@ -42,7 +42,7 @@ function missingKvResponse(env) {
     {
       error: 'kv_not_bound',
       projects: [],
-      hint: '请在 Pages Settings > Bindings 绑定 KV，Variable name 用 PROJECTS_KV，然后重新部署',
+      hint: 'Bind KV as projects_kv or PROJECTS_KV, then redeploy',
       envKeys: Object.keys(env || {}),
     },
     503,

@@ -1,3 +1,8 @@
 name = "pulse-board"
 compatibility_date = "2025-01-01"
 pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "projects_kv"
+id = "26b8a2ec20e8424e858f89fd3a2afc7b"
+preview_id = "26b8a2ec20e8424e858f89fd3a2afc7b"
