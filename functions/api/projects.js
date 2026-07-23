@@ -1,41 +1,49 @@
-interface Env {
-  PROJECTS_KV: KVNamespace
-}
-
 const KV_KEY = 'projects'
 const ACCESS_PASSWORD = 'tony1234'
 
-function json(data: unknown, status = 200): Response {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+}
+
+function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      ...corsHeaders,
     },
   })
 }
 
-function unauthorized(): Response {
+function unauthorized() {
   return json({ error: 'unauthorized' }, 401)
 }
 
-function isAuthorized(request: Request): boolean {
+function isAuthorized(request) {
   const header = request.headers.get('Authorization') || ''
   return header === `Bearer ${ACCESS_PASSWORD}`
 }
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
+export async function onRequestOptions() {
+  return new Response(null, { status: 204, headers: corsHeaders })
+}
+
+export async function onRequestGet(context) {
   if (!isAuthorized(context.request)) return unauthorized()
 
-  if (!context.env.PROJECTS_KV) {
+  const kv = context.env.PROJECTS_KV
+  if (!kv) {
     return json({ error: 'kv_not_bound', projects: [] }, 503)
   }
 
-  const raw = await context.env.PROJECTS_KV.get(KV_KEY)
+  const raw = await kv.get(KV_KEY)
   if (!raw) return json({ projects: [] })
 
   try {
-    const parsed = JSON.parse(raw) as unknown
+    const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return json({ projects: [] })
     return json({ projects: parsed })
   } catch {
@@ -43,29 +51,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 }
 
-export const onRequestPut: PagesFunction<Env> = async (context) => {
+export async function onRequestPut(context) {
   if (!isAuthorized(context.request)) return unauthorized()
 
-  if (!context.env.PROJECTS_KV) {
+  const kv = context.env.PROJECTS_KV
+  if (!kv) {
     return json({ error: 'kv_not_bound' }, 503)
   }
 
-  let body: unknown
+  let body
   try {
     body = await context.request.json()
   } catch {
     return json({ error: 'invalid_json' }, 400)
   }
 
-  const projects =
-    body && typeof body === 'object' && Array.isArray((body as { projects?: unknown }).projects)
-      ? (body as { projects: unknown[] }).projects
-      : null
-
+  const projects = body && Array.isArray(body.projects) ? body.projects : null
   if (!projects) {
     return json({ error: 'projects_array_required' }, 400)
   }
 
-  await context.env.PROJECTS_KV.put(KV_KEY, JSON.stringify(projects))
+  await kv.put(KV_KEY, JSON.stringify(projects))
   return json({ ok: true, count: projects.length })
 }

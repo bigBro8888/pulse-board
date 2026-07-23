@@ -109,7 +109,7 @@ export function useProjects() {
         if (cancelled) return
         hydrated.current = true
         setSyncStatus('error')
-        setSyncError('云端同步失败，数据仍保存在本机')
+        setSyncError('云端同步失败，数据仍保存在本机。请确认已绑定 PROJECTS_KV 并重新部署。')
       }
     }
 
@@ -138,7 +138,7 @@ export function useProjects() {
         } catch {
           if (cancelled) return
           setSyncStatus('error')
-          setSyncError('云端同步失败，数据仍保存在本机')
+          setSyncError('云端同步失败，数据仍保存在本机。请确认已绑定 PROJECTS_KV 并重新部署。')
         }
       })()
     }, 400)
