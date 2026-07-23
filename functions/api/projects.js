@@ -27,6 +27,22 @@ function isAuthorized(request) {
   return header === `Bearer ${ACCESS_PASSWORD}`
 }
 
+function getKv(env) {
+  return env.PROJECTS_KV || env.PULSE_KV || null
+}
+
+function missingKvResponse(env) {
+  return json(
+    {
+      error: 'kv_not_bound',
+      projects: [],
+      hint: '请在 Pages Settings > Bindings 绑定 KV，Variable name 用 PROJECTS_KV，然后重新部署',
+      envKeys: Object.keys(env || {}),
+    },
+    503,
+  )
+}
+
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: corsHeaders })
 }
@@ -34,10 +50,8 @@ export async function onRequestOptions() {
 export async function onRequestGet(context) {
   if (!isAuthorized(context.request)) return unauthorized()
 
-  const kv = context.env.PROJECTS_KV
-  if (!kv) {
-    return json({ error: 'kv_not_bound', projects: [] }, 503)
-  }
+  const kv = getKv(context.env)
+  if (!kv) return missingKvResponse(context.env)
 
   const raw = await kv.get(KV_KEY)
   if (!raw) return json({ projects: [] })
@@ -54,10 +68,8 @@ export async function onRequestGet(context) {
 export async function onRequestPut(context) {
   if (!isAuthorized(context.request)) return unauthorized()
 
-  const kv = context.env.PROJECTS_KV
-  if (!kv) {
-    return json({ error: 'kv_not_bound' }, 503)
-  }
+  const kv = getKv(context.env)
+  if (!kv) return missingKvResponse(context.env)
 
   let body
   try {
