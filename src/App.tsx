@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { isAuthenticated, Login } from './Login'
 import { ProjectCard } from './ProjectCard'
 import { ProjectForm } from './ProjectForm'
 import type { FilterKey, SortKey } from './types'
@@ -18,6 +19,7 @@ const SORTS: { key: SortKey; label: string }[] = [
 ]
 
 export default function App() {
+  const [authed, setAuthed] = useState(() => isAuthenticated())
   const { stats, addProject, updateProject, deleteProject, queryProjects } =
     useProjects()
   const [filter, setFilter] = useState<FilterKey>('all')
@@ -30,13 +32,17 @@ export default function App() {
     [queryProjects, filter, sort, search],
   )
 
+  if (!authed) {
+    return <Login onSuccess={() => setAuthed(true)} />
+  }
+
   return (
     <div className="app">
       <header className="topbar">
         <div className="shell topbar-inner">
           <div className="brand-block">
             <span className="logo-mark" aria-hidden="true" />
-            <span className="brand-name">Pulse Board</span>
+            <span className="brand-name">轻量化项目管理</span>
           </div>
 
           <div className="topbar-actions">
@@ -87,7 +93,7 @@ export default function App() {
       <main className="shell page">
         <section className="page-intro fade-in">
           <div>
-            <h1>Pulse Board</h1>
+            <h1>轻量化项目管理</h1>
             <p>让每个项目状态清晰可见</p>
           </div>
         </section>
