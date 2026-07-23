@@ -20,8 +20,15 @@ const SORTS: { key: SortKey; label: string }[] = [
 
 export default function App() {
   const [authed, setAuthed] = useState(() => isAuthenticated())
-  const { stats, addProject, updateProject, deleteProject, queryProjects } =
-    useProjects()
+  const {
+    stats,
+    syncStatus,
+    syncError,
+    addProject,
+    updateProject,
+    deleteProject,
+    queryProjects,
+  } = useProjects()
   const [filter, setFilter] = useState<FilterKey>('all')
   const [sort, setSort] = useState<SortKey>('updated')
   const [search, setSearch] = useState('')
@@ -38,6 +45,12 @@ export default function App() {
 
   return (
     <div className="app">
+      {syncError && (
+        <div className="sync-banner" role="status">
+          {syncError}
+          {syncStatus === 'syncing' ? '（重试中…）' : ''}
+        </div>
+      )}
       <header className="topbar">
         <div className="shell topbar-inner">
           <div className="brand-block">

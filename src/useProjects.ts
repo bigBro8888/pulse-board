@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { fetchRemoteProjects, saveRemoteProjects, type SyncStatus } from './api'
 import type { FilterKey, Project, ProjectStatus, SortKey } from './types'
 import { isOverdue } from './utils'
 
@@ -31,6 +32,10 @@ function normalize(raw: unknown): Project | null {
   }
 }
 
+function normalizeList(raw: unknown[]): Project[] {
+  return raw.map(normalize).filter((p): p is Project => p !== null)
+}
+
 function loadProjects(): Project[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -38,14 +43,10 @@ function loadProjects(): Project[] {
       const legacy = localStorage.getItem('lpm-projects')
       if (!legacy) return []
       const parsed = JSON.parse(legacy) as unknown[]
-      return Array.isArray(parsed)
-        ? parsed.map(normalize).filter((p): p is Project => p !== null)
-        : []
+      return Array.isArray(parsed) ? normalizeList(parsed) : []
     }
     const parsed = JSON.parse(raw) as unknown[]
-    return Array.isArray(parsed)
-      ? parsed.map(normalize).filter((p): p is Project => p !== null)
-      : []
+    return Array.isArray(parsed) ? normalizeList(parsed) : []
   } catch {
     return []
   }
@@ -73,9 +74,79 @@ function sortProjects(list: Project[], sort: SortKey): Project[] {
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>(() => loadProjects())
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
+  const [syncError, setSyncError] = useState('')
+  const skipNextCloudPush = useRef(false)
+  const hydrated = useRef(false)
 
   useEffect(() => {
     saveProjects(projects)
+  }, [projects])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function hydrateFromCloud() {
+      setSyncStatus('syncing')
+      setSyncError('')
+      try {
+        const remote = normalizeList(await fetchRemoteProjects())
+        if (cancelled) return
+
+        const local = loadProjects()
+        if (remote.length > 0) {
+          skipNextCloudPush.current = true
+          setProjects(remote)
+          saveProjects(remote)
+        } else if (local.length > 0) {
+          await saveRemoteProjects(local)
+          if (cancelled) return
+        }
+
+        hydrated.current = true
+        setSyncStatus('ok')
+      } catch {
+        if (cancelled) return
+        hydrated.current = true
+        setSyncStatus('error')
+        setSyncError('云端同步失败，数据仍保存在本机')
+      }
+    }
+
+    void hydrateFromCloud()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated.current) return
+    if (skipNextCloudPush.current) {
+      skipNextCloudPush.current = false
+      return
+    }
+
+    let cancelled = false
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setSyncStatus('syncing')
+        try {
+          await saveRemoteProjects(projects)
+          if (cancelled) return
+          setSyncStatus('ok')
+          setSyncError('')
+        } catch {
+          if (cancelled) return
+          setSyncStatus('error')
+          setSyncError('云端同步失败，数据仍保存在本机')
+        }
+      })()
+    }, 400)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
   }, [projects])
 
   const addProject = useCallback((input: ProjectInput) => {
@@ -173,6 +244,8 @@ export function useProjects() {
   return {
     projects,
     stats,
+    syncStatus,
+    syncError,
     addProject,
     updateProject,
     deleteProject,

@@ -63,6 +63,19 @@ button {
   background: var(--bg);
 }
 
+.sync-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 0.55rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #9a3412;
+  background: #ffedd5;
+  border-bottom: 1px solid #fed7aa;
+}
+
 .shell {
   width: var(--shell);
   max-width: 1360px;

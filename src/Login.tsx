@@ -1,14 +1,12 @@
 import { FormEvent, useState } from 'react'
-
-const AUTH_KEY = 'lpm-auth-v1'
-const PASSWORD = 'tony1234'
+import { ACCESS_PASSWORD, AUTH_STORAGE_KEY } from './auth'
 
 export function isAuthenticated(): boolean {
-  return sessionStorage.getItem(AUTH_KEY) === '1'
+  return sessionStorage.getItem(AUTH_STORAGE_KEY) === '1'
 }
 
 export function clearAuth(): void {
-  sessionStorage.removeItem(AUTH_KEY)
+  sessionStorage.removeItem(AUTH_STORAGE_KEY)
 }
 
 type LoginProps = {
@@ -21,8 +19,8 @@ export function Login({ onSuccess }: LoginProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (password === PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, '1')
+    if (password === ACCESS_PASSWORD) {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, '1')
       setError('')
       onSuccess()
       return
