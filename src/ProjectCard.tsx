@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useState } from 'react'
+import { ProjectFollowUpModal } from './ProjectFollowUpModal'
 import type { Project, ProjectStatus } from './types'
 import { STATUS_LABELS } from './types'
-import type { ProjectInput } from './useProjects'
+import type { ProjectPatch } from './useProjects'
 import {
   deadlineAlertClass,
   daysLeft,
@@ -13,15 +14,13 @@ import {
 
 type Props = {
   project: Project
-  onUpdate: (id: string, patch: Partial<ProjectInput>) => void
+  onUpdate: (id: string, patch: ProjectPatch) => void
   onDelete: (id: string) => void
 }
 
 export function ProjectCard({ project, onUpdate, onDelete }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [editingDesc, setEditingDesc] = useState(false)
-  const [descDraft, setDescDraft] = useState(project.description)
-  const descRef = useRef<HTMLTextAreaElement>(null)
+  const [showFollowUps, setShowFollowUps] = useState(false)
   const overdue = isOverdue(project)
   const left = daysLeft(project)
   const alertClass = deadlineAlertClass(project)
@@ -37,50 +36,16 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
   }
 
   const hint = deadlineHint()
-
-  useEffect(() => {
-    if (!editingDesc) setDescDraft(project.description)
-  }, [project.description, editingDesc])
-
-  useEffect(() => {
-    if (editingDesc && descRef.current) {
-      descRef.current.focus()
-      descRef.current.select()
-    }
-  }, [editingDesc])
-
-  function startEditDesc() {
-    setDescDraft(project.description)
-    setEditingDesc(true)
-    setMenuOpen(false)
-  }
-
-  function saveDesc() {
-    const next = descDraft.trim()
-    if (next !== project.description) {
-      onUpdate(project.id, { description: next })
-    }
-    setEditingDesc(false)
-  }
-
-  function cancelDesc() {
-    setDescDraft(project.description)
-    setEditingDesc(false)
-  }
-
-  function handleDescKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      cancelDesc()
-    }
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault()
-      saveDesc()
-    }
-  }
+  const completedFollowUps = project.followUps.filter(
+    (item) => item.status === 'completed',
+  ).length
+  const latestFollowUp = [...project.followUps].sort(
+    (a, b) => b.updatedAt - a.updatedAt,
+  )[0]
 
   return (
-    <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
+    <>
+      <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
       <div className="card-header">
         <h3 className="card-title" title={project.name}>
           {project.name}
@@ -143,9 +108,12 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
                   <button
                     type="button"
                     className="menu-action"
-                    onClick={startEditDesc}
+                    onClick={() => {
+                      setShowFollowUps(true)
+                      setMenuOpen(false)
+                    }}
                   >
-                    编辑说明
+                    管理跟进记录
                   </button>
                   <button
                     type="button"
@@ -164,28 +132,20 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
         </div>
       </div>
 
-      {editingDesc ? (
-        <textarea
-          ref={descRef}
-          className="card-desc-input"
-          rows={2}
-          value={descDraft}
-          placeholder="添加项目说明…"
-          onChange={(e) => setDescDraft(e.target.value)}
-          onBlur={saveDesc}
-          onKeyDown={handleDescKeyDown}
-          aria-label="编辑项目说明"
-        />
-      ) : (
         <button
           type="button"
-          className={`card-desc ${project.description ? '' : 'is-empty'}`}
-          title={project.description || '点击编辑说明'}
-          onClick={startEditDesc}
+          className={`card-follow-summary ${project.followUps.length ? '' : 'is-empty'}`}
+          onClick={() => setShowFollowUps(true)}
+          aria-label={`管理${project.name}的跟进记录`}
         >
-          {project.description || '暂无说明，点击编辑'}
+          <span className="card-follow-meta">
+            <strong>{project.followUps.length} 条跟进</strong>
+            <em>{completedFollowUps} 条已完成</em>
+          </span>
+          <span className="card-follow-latest">
+            {latestFollowUp?.title || '暂无记录，点击添加第一条跟进'}
+          </span>
         </button>
-      )}
 
       <div className="card-footer">
         <div className="card-meta-row">
@@ -213,6 +173,15 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
 
         <div className="card-updated">更新于 {formatRelativeTime(project.updatedAt)}</div>
       </div>
-    </article>
+      </article>
+
+      {showFollowUps && (
+        <ProjectFollowUpModal
+          project={project}
+          onUpdate={onUpdate}
+          onClose={() => setShowFollowUps(false)}
+        />
+      )}
+    </>
   )
 }
