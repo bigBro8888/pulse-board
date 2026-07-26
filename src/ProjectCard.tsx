@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ProjectFollowUpModal } from './ProjectFollowUpModal'
 import type { Project, ProjectStatus } from './types'
 import { STATUS_LABELS } from './types'
 import type { ProjectPatch } from './useProjects'
@@ -16,11 +15,16 @@ type Props = {
   project: Project
   onUpdate: (id: string, patch: ProjectPatch) => void
   onDelete: (id: string) => void
+  onOpenFollowUps: () => void
 }
 
-export function ProjectCard({ project, onUpdate, onDelete }: Props) {
+export function ProjectCard({
+  project,
+  onUpdate,
+  onDelete,
+  onOpenFollowUps,
+}: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [showFollowUps, setShowFollowUps] = useState(false)
   const overdue = isOverdue(project)
   const left = daysLeft(project)
   const alertClass = deadlineAlertClass(project)
@@ -44,8 +48,7 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
   )[0]
 
   return (
-    <>
-      <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
+    <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
       <div className="card-header">
         <h3 className="card-title" title={project.name}>
           {project.name}
@@ -109,7 +112,7 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
                     type="button"
                     className="menu-action"
                     onClick={() => {
-                      setShowFollowUps(true)
+                      onOpenFollowUps()
                       setMenuOpen(false)
                     }}
                   >
@@ -135,7 +138,7 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
         <button
           type="button"
           className={`card-follow-summary ${project.followUps.length ? '' : 'is-empty'}`}
-          onClick={() => setShowFollowUps(true)}
+          onClick={onOpenFollowUps}
           aria-label={`管理${project.name}的跟进记录`}
         >
           <span className="card-follow-meta">
@@ -173,15 +176,6 @@ export function ProjectCard({ project, onUpdate, onDelete }: Props) {
 
         <div className="card-updated">更新于 {formatRelativeTime(project.updatedAt)}</div>
       </div>
-      </article>
-
-      {showFollowUps && (
-        <ProjectFollowUpModal
-          project={project}
-          onUpdate={onUpdate}
-          onClose={() => setShowFollowUps(false)}
-        />
-      )}
-    </>
+    </article>
   )
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { isAuthenticated, Login } from './Login'
 import { ProjectCard } from './ProjectCard'
+import { ProjectFollowUpModal } from './ProjectFollowUpModal'
 import { ProjectForm } from './ProjectForm'
 import type { FilterKey, SortKey } from './types'
 import { useProjects } from './useProjects'
@@ -21,6 +22,7 @@ const SORTS: { key: SortKey; label: string }[] = [
 export default function App() {
   const [authed, setAuthed] = useState(() => isAuthenticated())
   const {
+    projects,
     stats,
     syncStatus,
     syncError,
@@ -33,11 +35,14 @@ export default function App() {
   const [sort, setSort] = useState<SortKey>('updated')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [followUpProjectId, setFollowUpProjectId] = useState<string | null>(null)
 
   const list = useMemo(
     () => queryProjects({ filter, sort, search }),
     [queryProjects, filter, sort, search],
   )
+  const followUpProject =
+    projects.find((project) => project.id === followUpProjectId) ?? null
 
   if (!authed) {
     return <Login onSuccess={() => setAuthed(true)} />
@@ -189,6 +194,7 @@ export default function App() {
                     project={project}
                     onUpdate={updateProject}
                     onDelete={deleteProject}
+                    onOpenFollowUps={() => setFollowUpProjectId(project.id)}
                   />
                 </div>
               ))}
@@ -199,6 +205,14 @@ export default function App() {
 
       {showForm && (
         <ProjectForm onSubmit={addProject} onClose={() => setShowForm(false)} />
+      )}
+
+      {followUpProject && (
+        <ProjectFollowUpModal
+          project={followUpProject}
+          onUpdate={updateProject}
+          onClose={() => setFollowUpProjectId(null)}
+        />
       )}
     </div>
   )

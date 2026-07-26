@@ -349,10 +349,14 @@ button {
 }
 
 .card-enter {
+  width: 100%;
+  min-width: 0;
   animation: cardIn 0.35s ease both;
 }
 
 .project-card {
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   height: 210px;
@@ -979,11 +983,14 @@ button {
 
 /* ——— Follow-up manager ——— */
 .follow-up-backdrop {
+  z-index: 100;
+  place-items: center;
   padding: 2rem;
 }
 
 .follow-up-modal {
-  width: min(1180px, 100%);
+  width: min(1240px, 100%);
+  height: min(760px, calc(100vh - 4rem));
   max-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
@@ -1090,6 +1097,7 @@ button {
 }
 
 .follow-up-table-wrap {
+  flex: 1;
   min-height: 180px;
   overflow: auto;
   padding: 0 1.4rem 1.4rem;
@@ -1463,6 +1471,7 @@ button {
 
   .follow-up-modal {
     width: 100%;
+    height: 94vh;
     max-height: 94vh;
     border-radius: 18px 18px 0 0;
   }
