@@ -424,6 +424,20 @@ button {
   text-overflow: ellipsis;
 }
 
+.card-title-input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 0.45rem;
+  border: 1px solid rgba(37, 99, 235, 0.5);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  font-size: 0.98rem;
+  font-weight: 700;
+  outline: none;
+}
+
 .card-header-right {
   display: flex;
   align-items: center;

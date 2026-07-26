@@ -25,6 +25,8 @@ export function ProjectCard({
   onOpenFollowUps,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameDraft, setNameDraft] = useState(project.name)
   const overdue = isOverdue(project)
   const left = daysLeft(project)
   const alertClass = deadlineAlertClass(project)
@@ -47,12 +49,44 @@ export function ProjectCard({
     (a, b) => b.updatedAt - a.updatedAt,
   )[0]
 
+  function saveName() {
+    const name = nameDraft.trim()
+    if (name && name !== project.name) {
+      onUpdate(project.id, { name })
+    } else {
+      setNameDraft(project.name)
+    }
+    setEditingName(false)
+  }
+
   return (
     <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
       <div className="card-header">
-        <h3 className="card-title" title={project.name}>
-          {project.name}
-        </h3>
+        {editingName ? (
+          <input
+            className="card-title-input"
+            value={nameDraft}
+            autoFocus
+            maxLength={80}
+            aria-label="修改项目名称"
+            onChange={(event) => setNameDraft(event.target.value)}
+            onBlur={saveName}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveName()
+              }
+              if (event.key === 'Escape') {
+                setNameDraft(project.name)
+                setEditingName(false)
+              }
+            }}
+          />
+        ) : (
+          <h3 className="card-title" title={project.name}>
+            {project.name}
+          </h3>
+        )}
         <div className="card-header-right">
           <span className={`status-badge badge-${displayStatus}`}>
             {overdue && project.status !== 'completed'
@@ -108,6 +142,17 @@ export function ProjectCard({
                       }
                     />
                   </label>
+                  <button
+                    type="button"
+                    className="menu-action"
+                    onClick={() => {
+                      setNameDraft(project.name)
+                      setEditingName(true)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    修改项目名称
+                  </button>
                   <button
                     type="button"
                     className="menu-action"
