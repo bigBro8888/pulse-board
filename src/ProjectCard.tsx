@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Project, ProjectStatus } from './types'
-import { STATUS_LABELS } from './types'
+import { FOLLOW_UP_STATUS_LABELS, STATUS_LABELS } from './types'
 import type { ProjectPatch } from './useProjects'
 import {
   deadlineAlertClass,
@@ -45,9 +45,9 @@ export function ProjectCard({
   const completedFollowUps = project.followUps.filter(
     (item) => item.status === 'completed',
   ).length
-  const latestFollowUp = [...project.followUps].sort(
-    (a, b) => b.updatedAt - a.updatedAt,
-  )[0]
+  const recentFollowUps = [...project.followUps]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 5)
 
   function saveName() {
     const name = nameDraft.trim()
@@ -190,9 +190,21 @@ export function ProjectCard({
             <strong>{project.followUps.length} 条跟进</strong>
             <em>{completedFollowUps} 条已完成</em>
           </span>
-          <span className="card-follow-latest">
-            {latestFollowUp?.title || '暂无记录，点击添加第一条跟进'}
-          </span>
+          {recentFollowUps.length > 0 ? (
+            <span className="card-follow-list">
+              {recentFollowUps.map((item) => (
+                <span className="card-follow-item" key={item.id}>
+                  <i className={`follow-dot status-${item.status}`} />
+                  <span title={item.title}>{item.title}</span>
+                  <small>{FOLLOW_UP_STATUS_LABELS[item.status]}</small>
+                </span>
+              ))}
+            </span>
+          ) : (
+            <span className="card-follow-latest">
+              暂无记录，点击添加第一条跟进
+            </span>
+          )}
         </button>
 
       <div className="card-footer">

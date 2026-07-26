@@ -343,14 +343,16 @@ button {
 
 /* ——— Project grid ——— */
 .project-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.9rem;
+  column-count: 3;
+  column-gap: 0.9rem;
 }
 
 .card-enter {
+  display: inline-block;
   width: 100%;
   min-width: 0;
+  margin-bottom: 0.9rem;
+  break-inside: avoid;
   animation: cardIn 0.35s ease both;
 }
 
@@ -359,7 +361,8 @@ button {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  height: 210px;
+  min-height: 210px;
+  height: auto;
   padding: 1rem 1.05rem 0.9rem;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -509,7 +512,6 @@ button {
 
 .card-follow-summary {
   margin: 0.55rem 0 0;
-  flex: 1;
   width: 100%;
   min-height: 56px;
   display: flex;
@@ -561,6 +563,51 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.card-follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding-top: 0.1rem;
+}
+
+.card-follow-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.38rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.card-follow-item > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card-follow-item small {
+  color: var(--faint);
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+.follow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.follow-dot.status-in_progress {
+  background: var(--accent);
+}
+
+.follow-dot.status-completed {
+  background: var(--green);
 }
 
 .card-desc-input {
@@ -1430,7 +1477,7 @@ button {
 /* ——— Responsive ——— */
 @media (max-width: 1100px) {
   .project-grid {
-    grid-template-columns: repeat(2, 1fr);
+    column-count: 2;
   }
 
   .dashboard {
@@ -1471,7 +1518,7 @@ button {
   }
 
   .project-grid {
-    grid-template-columns: 1fr;
+    column-count: 1;
   }
 
   .field-row {
