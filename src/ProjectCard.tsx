@@ -62,31 +62,42 @@ export function ProjectCard({
   return (
     <article className={`project-card status-${displayStatus} ${alertClass}`.trim()}>
       <div className="card-header">
-        {editingName ? (
-          <input
-            className="card-title-input"
-            value={nameDraft}
-            autoFocus
-            maxLength={80}
-            aria-label="修改项目名称"
-            onChange={(event) => setNameDraft(event.target.value)}
-            onBlur={saveName}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                saveName()
-              }
-              if (event.key === 'Escape') {
-                setNameDraft(project.name)
-                setEditingName(false)
-              }
-            }}
+        <div className="card-title-group">
+          <span
+            className={`project-status-icon status-${displayStatus}`}
+            title={
+              displayStatus === 'overdue'
+                ? '延期'
+                : STATUS_LABELS[project.status]
+            }
+            aria-hidden="true"
           />
-        ) : (
-          <h3 className="card-title" title={project.name}>
-            {project.name}
-          </h3>
-        )}
+          {editingName ? (
+            <input
+              className="card-title-input"
+              value={nameDraft}
+              autoFocus
+              maxLength={80}
+              aria-label="修改项目名称"
+              onChange={(event) => setNameDraft(event.target.value)}
+              onBlur={saveName}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  saveName()
+                }
+                if (event.key === 'Escape') {
+                  setNameDraft(project.name)
+                  setEditingName(false)
+                }
+              }}
+            />
+          ) : (
+            <h3 className="card-title" title={project.name}>
+              {project.name}
+            </h3>
+          )}
+        </div>
         <div className="card-header-right">
           <span className={`status-badge badge-${displayStatus}`}>
             {overdue && project.status !== 'completed'

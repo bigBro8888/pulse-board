@@ -377,41 +377,66 @@ button {
   border-color: #dddcd8;
 }
 
-.project-card.deadline-warn-2d {
-  background: #fff5f5;
-  border-color: #fecaca;
-}
-
-.project-card.deadline-warn-2d:hover {
-  border-color: #fca5a5;
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.06), 0 12px 28px rgba(220, 38, 38, 0.08);
-}
-
-.project-card.deadline-warn-1d {
-  background: #fee2e2;
-  border-color: #f87171;
-}
-
-.project-card.deadline-warn-1d:hover {
-  border-color: #ef4444;
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.1), 0 12px 28px rgba(220, 38, 38, 0.12);
-}
-
-.project-card.status-overdue {
-  background: #fecaca;
-  border-color: #ef4444;
-}
-
-.project-card.status-overdue:hover {
-  border-color: #dc2626;
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.12), 0 12px 28px rgba(220, 38, 38, 0.14);
-}
-
 .card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.6rem;
+}
+
+.card-title-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+}
+
+.project-status-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--accent);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.project-status-icon::before {
+  content: '▶';
+  transform: translateX(0.5px) scale(0.72);
+}
+
+.project-status-icon.status-paused {
+  background: var(--amber);
+}
+
+.project-status-icon.status-paused::before {
+  content: 'Ⅱ';
+  transform: none;
+}
+
+.project-status-icon.status-completed {
+  background: var(--green);
+}
+
+.project-status-icon.status-completed::before {
+  content: '✓';
+  transform: none;
+}
+
+.project-status-icon.status-overdue {
+  background: var(--red);
+}
+
+.project-status-icon.status-overdue::before {
+  content: '!';
+  transform: none;
 }
 
 .card-title {
