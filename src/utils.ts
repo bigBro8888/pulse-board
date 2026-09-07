@@ -11,7 +11,7 @@ export function daysLeft(project: Project): number | null {
 }
 
 export function deadlineAlertClass(project: Project): string {
-  if (project.status === 'completed') return ''
+  if (project.status === 'completed' || project.status === 'paused') return ''
   const left = daysLeft(project)
   if (left === null) return ''
   if (left === 2) return 'deadline-warn-2d'

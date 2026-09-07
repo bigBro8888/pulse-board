@@ -38,5 +38,5 @@ export const FOLLOW_UP_STATUS_LABELS: Record<FollowUpStatus, string> = {
   completed: '已完成',
 }
 
-export type FilterKey = 'all' | 'active' | 'overdue' | 'completed'
+export type FilterKey = 'all' | 'active' | 'paused' | 'overdue' | 'completed'
 export type SortKey = 'updated' | 'deadline' | 'progress'

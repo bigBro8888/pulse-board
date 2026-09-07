@@ -258,15 +258,17 @@ export function useProjects() {
   }, [])
 
   const stats = useMemo(() => {
-    const active = projects.filter((p) => p.status === 'active' || p.status === 'paused')
+    const active = projects.filter((p) => p.status === 'active')
     const completed = projects.filter((p) => p.status === 'completed')
     const dueSoon = projects.filter((p) => {
-      if (p.status === 'completed' || !p.deadline) return false
+      if (p.status === 'completed' || p.status === 'paused' || !p.deadline) return false
       const end = new Date(p.deadline + 'T23:59:59').getTime()
       const diff = end - Date.now()
       return diff >= 0 && diff <= 7 * 86400000
     })
-    const overdue = projects.filter(isOverdue)
+    const overdue = projects.filter(
+      (p) => p.status !== 'paused' && isOverdue(p),
+    )
     const avg =
       projects.length === 0
         ? 0
@@ -286,11 +288,12 @@ export function useProjects() {
     (opts: { filter: FilterKey; sort: SortKey; search: string }) => {
       const q = opts.search.trim().toLowerCase()
       let list = projects.filter((p) => {
-        if (opts.filter === 'active') {
-          return p.status === 'active' || p.status === 'paused'
-        }
+        if (opts.filter === 'active') return p.status === 'active'
+        if (opts.filter === 'paused') return p.status === 'paused'
         if (opts.filter === 'completed') return p.status === 'completed'
-        if (opts.filter === 'overdue') return isOverdue(p)
+        if (opts.filter === 'overdue') {
+          return p.status !== 'paused' && isOverdue(p)
+        }
         return true
       })
       if (q) {

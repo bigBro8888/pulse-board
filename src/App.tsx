@@ -9,6 +9,7 @@ import { useProjects } from './useProjects'
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'active', label: '进行中' },
+  { key: 'paused', label: '已暂停' },
   { key: 'overdue', label: '延期' },
   { key: 'completed', label: '已完成' },
 ]

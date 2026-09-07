@@ -29,8 +29,14 @@ export function ProjectCard({
   const [nameDraft, setNameDraft] = useState(project.name)
   const overdue = isOverdue(project)
   const left = daysLeft(project)
-  const alertClass = deadlineAlertClass(project)
-  const displayStatus = overdue && project.status !== 'completed' ? 'overdue' : project.status
+  const isPaused = project.status === 'paused'
+  // 已暂停优先于延期：黄色等待再次启动
+  const displayStatus = isPaused
+    ? 'paused'
+    : overdue && project.status !== 'completed'
+      ? 'overdue'
+      : project.status
+  const alertClass = isPaused ? '' : deadlineAlertClass(project)
 
   function deadlineHint() {
     if (left === null || project.status === 'completed') return null
@@ -100,9 +106,11 @@ export function ProjectCard({
         </div>
         <div className="card-header-right">
           <span className={`status-badge badge-${displayStatus}`}>
-            {overdue && project.status !== 'completed'
-              ? '延期'
-              : STATUS_LABELS[project.status]}
+            {isPaused
+              ? '已暂停'
+              : overdue && project.status !== 'completed'
+                ? '延期'
+                : STATUS_LABELS[project.status]}
           </span>
           <div className="card-menu">
             <button
