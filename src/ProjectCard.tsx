@@ -7,8 +7,10 @@ import {
   daysLeft,
   formatDeadline,
   formatRelativeTime,
+  getPriority,
   isOverdue,
   ownerInitials,
+  PRIORITY_LABELS,
 } from './utils'
 
 type Props = {
@@ -37,6 +39,7 @@ export function ProjectCard({
       ? 'overdue'
       : project.status
   const alertClass = isPaused ? '' : deadlineAlertClass(project)
+  const priority = getPriority(project)
 
   function deadlineHint() {
     if (left === null || project.status === 'completed') return null
@@ -105,6 +108,12 @@ export function ProjectCard({
           )}
         </div>
         <div className="card-header-right">
+          <span
+            className={`priority-badge priority-${priority.toLowerCase()}`}
+            title={`优先级 ${priority} · ${PRIORITY_LABELS[priority]}`}
+          >
+            {priority}
+          </span>
           <span className={`status-badge badge-${displayStatus}`}>
             {isPaused
               ? '已暂停'

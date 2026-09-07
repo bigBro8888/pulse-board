@@ -117,6 +117,9 @@ function sortProjects(list: Project[], sort: SortKey): Project[] {
   }
   if (sort === 'deadline') {
     return copy.sort((a, b) => {
+      const aDone = a.status === 'completed'
+      const bDone = b.status === 'completed'
+      if (aDone !== bDone) return aDone ? 1 : -1
       if (!a.deadline && !b.deadline) return b.updatedAt - a.updatedAt
       if (!a.deadline) return 1
       if (!b.deadline) return -1

@@ -15,8 +15,8 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ]
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: 'updated', label: '最近更新' },
   { key: 'deadline', label: '截止日期' },
+  { key: 'updated', label: '最近更新' },
   { key: 'progress', label: '进度' },
 ]
 
@@ -33,7 +33,7 @@ export default function App() {
     queryProjects,
   } = useProjects()
   const [filter, setFilter] = useState<FilterKey>('all')
-  const [sort, setSort] = useState<SortKey>('updated')
+  const [sort, setSort] = useState<SortKey>('deadline')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [followUpProjectId, setFollowUpProjectId] = useState<string | null>(null)

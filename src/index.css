@@ -485,6 +485,40 @@ button {
   animation: badgePop 0.35s ease both;
 }
 
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-width: 28px;
+  padding: 0 0.4rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.priority-p0 {
+  background: #450a0a;
+  color: #fecaca;
+}
+
+.priority-p1 {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.priority-p2 {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.priority-p3 {
+  background: #ececea;
+  color: var(--muted);
+}
+
 .badge-active {
   background: var(--accent-soft);
   color: var(--accent);

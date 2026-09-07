@@ -54,3 +54,23 @@ export function ownerInitials(name: string): string {
   if (!trimmed) return '?'
   return trimmed.slice(0, 1).toUpperCase()
 }
+
+/** P0 已逾期 · P1 三天内 · P2 约一周(4–9天) · P3 十天及以上/无截止日期 */
+export type Priority = 'P0' | 'P1' | 'P2' | 'P3'
+
+export const PRIORITY_LABELS: Record<Priority, string> = {
+  P0: '已逾期',
+  P1: '三天内',
+  P2: '约一周',
+  P3: '较充裕',
+}
+
+export function getPriority(project: Project): Priority {
+  if (project.status === 'completed') return 'P3'
+  const left = daysLeft(project)
+  if (left === null) return 'P3'
+  if (left < 0) return 'P0'
+  if (left <= 3) return 'P1'
+  if (left <= 9) return 'P2'
+  return 'P3'
+}
