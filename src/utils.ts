@@ -74,3 +74,38 @@ export function getPriority(project: Project): Priority {
   if (left <= 9) return 'P2'
   return 'P3'
 }
+
+export function normalizeAttachmentUrl(url: string): string | null {
+  const trimmed = url.trim()
+  if (!trimmed) return null
+  try {
+    const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    const parsed = new URL(withProto)
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null
+    return parsed.toString()
+  } catch {
+    return null
+  }
+}
+
+export function inferAttachmentName(url: string): string {
+  try {
+    const parsed = new URL(url)
+    const parts = parsed.pathname.split('/').filter(Boolean)
+    let last = parts[parts.length - 1] || ''
+    last = decodeURIComponent(last.replace(/\+/g, ' '))
+    if (!last || /^(view|edit|preview|d|file|document|open|share)$/i.test(last)) {
+      return `${parsed.hostname.replace(/^www\./, '')} 文档`
+    }
+    return last.length > 48 ? `${last.slice(0, 45)}…` : last
+  } catch {
+    return '附件'
+  }
+}
+
+export function countProjectAttachments(project: Project): number {
+  return project.followUps.reduce(
+    (sum, item) => sum + (item.attachments?.length ?? 0),
+    0,
+  )
+}

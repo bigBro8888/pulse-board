@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { fetchRemoteProjects, saveRemoteProjects, type SyncStatus } from './api'
 import type {
   FilterKey,
+  FollowUpAttachment,
   FollowUpRecord,
   FollowUpStatus,
   Project,
   ProjectStatus,
   SortKey,
 } from './types'
-import { isOverdue } from './utils'
+import { inferAttachmentName, isOverdue } from './utils'
 
 const STORAGE_KEY = 'lpm-projects-v2'
 
@@ -25,6 +26,19 @@ export type ProjectPatch = Partial<ProjectInput> & {
   followUps?: FollowUpRecord[]
 }
 
+function normalizeAttachment(raw: unknown, fallbackId: string): FollowUpAttachment | null {
+  if (!raw || typeof raw !== 'object') return null
+  const item = raw as Partial<FollowUpAttachment>
+  const url = String(item.url ?? '').trim()
+  if (!url) return null
+  const name = String(item.name ?? '').trim() || inferAttachmentName(url)
+  return {
+    id: String(item.id || fallbackId),
+    name,
+    url,
+  }
+}
+
 function normalizeFollowUp(raw: unknown, fallbackId: string): FollowUpRecord | null {
   if (!raw || typeof raw !== 'object') return null
   const item = raw as Partial<FollowUpRecord>
@@ -34,6 +48,13 @@ function normalizeFollowUp(raw: unknown, fallbackId: string): FollowUpRecord | n
     item.status === 'in_progress' || item.status === 'completed'
       ? item.status
       : 'pending'
+  const attachments = Array.isArray(item.attachments)
+    ? item.attachments
+        .map((att, index) =>
+          normalizeAttachment(att, `${fallbackId}-att-${index}`),
+        )
+        .filter((att): att is FollowUpAttachment => att !== null)
+    : []
   return {
     id: String(item.id || fallbackId),
     title: String(item.title).trim(),
@@ -41,6 +62,7 @@ function normalizeFollowUp(raw: unknown, fallbackId: string): FollowUpRecord | n
     owner: String(item.owner ?? '未指定').trim() || '未指定',
     deadline: String(item.deadline ?? ''),
     notes: String(item.notes ?? ''),
+    attachments,
     createdAt: Number(item.createdAt) || now,
     updatedAt: Number(item.updatedAt) || Number(item.createdAt) || now,
   }
@@ -68,6 +90,7 @@ function normalize(raw: unknown): Project | null {
             owner: String(p.owner ?? '未指定').trim() || '未指定',
             deadline: String(p.deadline ?? ''),
             notes: '由原项目说明自动迁移',
+            attachments: [],
             createdAt: Number(p.createdAt) || now,
             updatedAt: Number(p.updatedAt) || Number(p.createdAt) || now,
           },
@@ -219,6 +242,7 @@ export function useProjects() {
               owner: input.owner.trim() || '未指定',
               deadline: input.deadline,
               notes: '',
+              attachments: [],
               createdAt: now,
               updatedAt: now,
             },

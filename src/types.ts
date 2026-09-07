@@ -2,6 +2,12 @@ export type ProjectStatus = 'active' | 'paused' | 'completed'
 
 export type FollowUpStatus = 'pending' | 'in_progress' | 'completed'
 
+export interface FollowUpAttachment {
+  id: string
+  name: string
+  url: string
+}
+
 export interface FollowUpRecord {
   id: string
   title: string
@@ -9,6 +15,7 @@ export interface FollowUpRecord {
   owner: string
   deadline: string
   notes: string
+  attachments: FollowUpAttachment[]
   createdAt: number
   updatedAt: number
 }

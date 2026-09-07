@@ -3,6 +3,7 @@ import type { Project, ProjectStatus } from './types'
 import { FOLLOW_UP_STATUS_LABELS, STATUS_LABELS } from './types'
 import type { ProjectPatch } from './useProjects'
 import {
+  countProjectAttachments,
   deadlineAlertClass,
   daysLeft,
   formatDeadline,
@@ -54,6 +55,7 @@ export function ProjectCard({
   const completedFollowUps = project.followUps.filter(
     (item) => item.status === 'completed',
   ).length
+  const attachmentCount = countProjectAttachments(project)
   const recentFollowUps = [...project.followUps]
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .slice(0, 5)
@@ -217,6 +219,11 @@ export function ProjectCard({
           <span className="card-follow-meta">
             <strong>{project.followUps.length} 条跟进</strong>
             <em>{completedFollowUps} 条已完成</em>
+            {attachmentCount > 0 && (
+              <span className="card-attach-flag" title={`${attachmentCount} 个附件`}>
+                有附件 · {attachmentCount}
+              </span>
+            )}
           </span>
           {recentFollowUps.length > 0 ? (
             <span className="card-follow-list">
