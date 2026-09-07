@@ -1381,12 +1381,23 @@ button {
   background: var(--red-soft);
 }
 
-.attach-composer {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) auto;
-  gap: 0.4rem;
-  align-items: center;
+.attach-composer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
+
+.attach-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--faint);
+  line-height: 1.4;
+}
+
+.follow-up-table tr.is-editing {
+  background: rgba(37, 99, 235, 0.04);
+}
+
 
 .attach-add-btn {
   height: 34px;

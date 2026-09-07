@@ -133,6 +133,22 @@ function saveProjects(projects: Project[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
 }
 
+function mergeProjectsByUpdatedAt(local: Project[], remote: Project[]): Project[] {
+  const map = new Map<string, Project>()
+  for (const item of remote) map.set(item.id, item)
+  for (const item of local) {
+    const existing = map.get(item.id)
+    if (!existing || item.updatedAt >= existing.updatedAt) {
+      map.set(item.id, item)
+    }
+  }
+  const remoteIds = new Set(remote.map((item) => item.id))
+  const mergedRemoteOrder = remote.map((item) => map.get(item.id)!)
+  const localOnly = local.filter((item) => !remoteIds.has(item.id))
+  return [...localOnly, ...mergedRemoteOrder].sort((a, b) => b.updatedAt - a.updatedAt)
+}
+
+
 function sortProjects(list: Project[], sort: SortKey): Project[] {
   const copy = [...list]
   if (sort === 'updated') {
@@ -174,9 +190,11 @@ export function useProjects() {
 
         const local = loadProjects()
         if (remote.length > 0) {
-          setProjects(remote)
-          saveProjects(remote)
-          await saveRemoteProjects(remote)
+          // 避免页面加载中本地刚改的数据被旧云端结果覆盖
+          const merged = mergeProjectsByUpdatedAt(local, remote)
+          setProjects(merged)
+          saveProjects(merged)
+          await saveRemoteProjects(merged)
           if (cancelled) return
         } else if (local.length > 0) {
           await saveRemoteProjects(local)
